@@ -35,7 +35,7 @@ app.get("/setting",(req,res)=>{
 
 connectDB()
 
-app.use("/api/v1/user/", UserRoutes)
+app.use("/api/v1/user", UserRoutes)
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
