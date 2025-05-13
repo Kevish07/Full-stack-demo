@@ -2,7 +2,7 @@ import User from "../model/User.model.js";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 
-export const registerUser = async (req, res) => {
+const registerUser = async (req, res) => {
   // res.send("User Registered Successfully")
 
   const { name, email, password } = req.body;
@@ -85,3 +85,9 @@ export const registerUser = async (req, res) => {
     });
   }
 };
+
+const verifyUser = async (req,res)=>{
+  
+}
+
+export {registerUser, verifyUser}

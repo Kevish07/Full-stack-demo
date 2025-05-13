@@ -9,19 +9,19 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["user", "admin"],
       default: "user",
-      isVerified: {
-        type: Boolean,
-        default: false,
-      },
-      verificationToken: {
-        type: String,
-      },
-      resetPasswordToken: {
-        type: String,
-      },
-      resetPasswordExpires: {
-        type: Date,
-      },
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: {
+      type: String,
+    },
+    resetPasswordToken: {
+      type: String,
+    },
+    resetPasswordExpires: {
+      type: Date,
     },
   },
   {
