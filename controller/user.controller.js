@@ -1,6 +1,8 @@
 import User from "../model/User.model.js";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
+import bcrypt from "bcryptjs";
+import {} from "jsonwebtoken";
 
 const registerUser = async (req, res) => {
   // res.send("User Registered Successfully")
@@ -109,4 +111,36 @@ const verifyUser = async (req, res) => {
 
 };
 
-export { registerUser, verifyUser };
+const login = async (req,res)=>{
+  const {email,password} = req.body
+
+  if(!email || !password){
+    res.status(400).json({
+      message:"All field are required"
+    })
+  }
+
+  try {
+    const user = await User.findOne({email})
+
+    if(!user){
+      res.status(400).json({
+      message:"User does not exists"
+    })
+    }
+
+    const isMatch = await bcrypt.compare(password,user.password)
+    if (!isMatch){
+      res.status(400).json({
+        message:"Invalid email or password"
+      })
+    }
+
+    
+
+  } catch (error) {
+    
+  }
+}
+
+export { registerUser, verifyUser, login };
