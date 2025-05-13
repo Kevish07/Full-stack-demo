@@ -2,7 +2,8 @@ import User from "../model/User.model.js";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 import bcrypt from "bcryptjs";
-import {} from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+import cookieParser from "cookie-parser";
 
 const registerUser = async (req, res) => {
   // res.send("User Registered Successfully")
@@ -105,42 +106,59 @@ const verifyUser = async (req, res) => {
     });
   }
 
-  user.isVerified = true
-  user.verificationToken = undefined
-  await user.save()
-
+  user.isVerified = true;
+  user.verificationToken = undefined;
+  await user.save();
 };
 
-const login = async (req,res)=>{
-  const {email,password} = req.body
+const login = async (req, res) => {
+  const { email, password } = req.body;
 
-  if(!email || !password){
+  if (!email || !password) {
     res.status(400).json({
-      message:"All field are required"
-    })
+      message: "All field are required",
+    });
   }
 
   try {
-    const user = await User.findOne({email})
+    const user = await User.findOne({ email });
 
-    if(!user){
+    if (!user) {
       res.status(400).json({
-      message:"User does not exists"
+        message: "User does not exists",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      res.status(400).json({
+        message: "Invalid email or password",
+      });
+    }
+
+    const token = jwt.sign({ id: user._id }, "shhhhh", { expiresIn: "24h" });
+
+    const cookieOptions = {
+      httpOnly: true,
+      secure: true,
+      maxAge: 24*60*60*1000,
+    }
+
+    res.cookieParser("token", token, cookieOptions)
+
+    res.status(200).json({
+      success: true,
+      message:"Login successful",
+      token,
+      user:{
+        id: user._id,
+        name: user.name,
+        role: user.role,
+      }
     })
-    }
-
-    const isMatch = await bcrypt.compare(password,user.password)
-    if (!isMatch){
-      res.status(400).json({
-        message:"Invalid email or password"
-      })
-    }
-
     
 
-  } catch (error) {
-    
-  }
-}
+  } catch (error) {}
+};
 
 export { registerUser, verifyUser, login };
