@@ -3,7 +3,6 @@ import crypto from "crypto";
 import nodemailer from "nodemailer";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import cookieParser from "cookie-parser";
 
 const registerUser = async (req, res) => {
   // res.send("User Registered Successfully")
@@ -115,7 +114,7 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    res.status(400).json({
+    return res.status(400).json({
       message: "All field are required",
     });
   }
@@ -124,14 +123,14 @@ const login = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      res.status(400).json({
+      return res.status(400).json({
         message: "User does not exists",
       });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      res.status(400).json({
+      return res.status(400).json({
         message: "Invalid email or password",
       });
     }
@@ -141,24 +140,60 @@ const login = async (req, res) => {
     const cookieOptions = {
       httpOnly: true,
       secure: true,
-      maxAge: 24*60*60*1000,
-    }
+      maxAge: 24 * 60 * 60 * 1000,
+    };
 
-    res.cookieParser("token", token, cookieOptions)
+    res.cookie("token", token, cookieOptions);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message:"Login successful",
+      message: "Login successful",
       token,
-      user:{
+      user: {
         id: user._id,
         name: user.name,
         role: user.role,
-      }
-    })
-    
-
-  } catch (error) {}
+      },
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: "fail to login",
+      success: false,
+      error:error,
+    });
+  }
 };
 
-export { registerUser, verifyUser, login };
+const getProfile = async (req,res)=> {
+  try {
+    
+  } catch (error) {
+    
+  }
+}
+
+const logoutUser = async (req,res)=> {
+  try {
+    
+  } catch (error) {
+    
+  }
+}
+
+const forgotPassword = async (req,res)=> {
+  try {
+    
+  } catch (error) {
+    
+  }
+}
+
+const resetPassword = async (req,res)=> {
+  try {
+    
+  } catch (error) {
+    
+  }
+}
+
+export { registerUser, verifyUser, login, getProfile, logoutUser, forgotPassword, resetPassword, };
