@@ -159,41 +159,64 @@ const login = async (req, res) => {
     return res.status(400).json({
       message: "fail to login",
       success: false,
-      error:error,
+      error: error,
     });
   }
 };
 
-const getProfile = async (req,res)=> {
+const getProfile = async (req, res) => {
   try {
-    
-  } catch (error) {
-    
-  }
-}
+    const user = await User.findById(req.user.id).select("-password");
+    console.log(user)
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found",
+      });
+    }
 
-const logoutUser = async (req,res)=> {
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: "Unable to get user",
+    });
+  }
+};
+
+const logoutUser = async (req, res) => {
   try {
-    
+    res.cookie("token", "", {});
+    return res.status(200).json({
+      success: true,
+      message: "User logout successfully",
+    });
   } catch (error) {
-    
+    return res.status(400).json({
+      success:false,
+      message:"Fail to logout user"
+    })
   }
-}
+};
 
-const forgotPassword = async (req,res)=> {
-  try {
-    
-  } catch (error) {
-    
-  }
-}
 
-const resetPassword = async (req,res)=> {
-  try {
-    
-  } catch (error) {
-    
-  }
-}
+// const forgotPassword = async (req, res) => {
+//   try {
+//   } catch (error) {}
+// };
 
-export { registerUser, verifyUser, login, getProfile, logoutUser, forgotPassword, resetPassword, };
+// const resetPassword = async (req, res) => {
+//   try {
+//   } catch (error) {}
+// };
+
+export {
+  registerUser,
+  verifyUser,
+  login,
+  getProfile,
+  logoutUser,
+};
