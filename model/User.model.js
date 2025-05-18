@@ -3,9 +3,22 @@ import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
-    name: String,
-    email: String,
-    password: String,
+    name: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+    email: {
+      type: String,
+      unique: true,
+      trim: true,
+      required: true,
+    },
+    password: {
+      type: String,
+      trim: true,
+      required: true,
+    },
     role: {
       type: String,
       enum: ["user", "admin"],
@@ -18,11 +31,20 @@ const userSchema = new mongoose.Schema(
     verificationToken: {
       type: String,
     },
+    verificationTokenExpiry: {
+      type: Date,
+    },
     resetPasswordToken: {
       type: String,
     },
     resetPasswordExpires: {
       type: Date,
+    },
+    accessToken: {
+      type: String,
+    },
+    refreshAccessToken: {
+      type: String,
     },
   },
   {

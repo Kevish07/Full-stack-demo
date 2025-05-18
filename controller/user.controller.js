@@ -13,7 +13,6 @@ const registerUser = async (req, res) => {
       message: "All fields are required",
     });
   }
-  console.log(email);
 
   try {
     // User Validation
@@ -101,13 +100,18 @@ const verifyUser = async (req, res) => {
 
   if (!user) {
     return res.status(400).json({
-      message: "Invalid token",
+      message: "User not found Invalid token",
     });
   }
 
   user.isVerified = true;
   user.verificationToken = undefined;
   await user.save();
+
+  res.status(200).json({
+    success:true,
+    message:"User is now verified"
+  })
 };
 
 const login = async (req, res) => {
@@ -121,7 +125,6 @@ const login = async (req, res) => {
 
   try {
     const user = await User.findOne({ email });
-
     if (!user) {
       return res.status(400).json({
         message: "User does not exists",
@@ -134,8 +137,16 @@ const login = async (req, res) => {
         message: "Invalid email or password",
       });
     }
+    const accessToken = jwt.sign({ id: user._id }, "shhhhh", {
+      expiresIn: "5min",
+    });
+    const refreshAccessToken = jwt.sign({ id: user._id }, "nowShhhhh", {
+      expiresIn: "24h",
+    });
 
-    const token = jwt.sign({ id: user._id }, "shhhhh", { expiresIn: "24h" });
+    user.refreshAccessToken = refreshAccessToken;
+
+    await user.save();
 
     const cookieOptions = {
       httpOnly: true,
@@ -143,12 +154,12 @@ const login = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
     };
 
-    res.cookie("token", token, cookieOptions);
+    res.cookie("accessToken", accessToken, cookieOptions);
+    res.cookie("refreshAccessToken", refreshAccessToken, cookieOptions);
 
     return res.status(200).json({
       success: true,
       message: "Login successful",
-      token,
       user: {
         id: user._id,
         name: user.name,
@@ -166,8 +177,8 @@ const login = async (req, res) => {
 
 const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
-    console.log(user)
+    const user = await User.findById(req.user.id).select("-password -refreshAccessToken");
+    console.log(user);
     if (!user) {
       return res.status(400).json({
         success: false,
@@ -189,19 +200,43 @@ const getProfile = async (req, res) => {
 
 const logoutUser = async (req, res) => {
   try {
-    res.cookie("token", "", {});
+    const token = req.cookies?.refreshAccessToken;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
+
+    const refreshDecoded = jwt.verify(token, "nowShhhhh");
+    
+    const user = await User.findOne({_id: refreshDecoded.id});
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
+
+    user.refreshAccessToken = null;
+    await user.save()
+
+    res.cookie("accessToken", "", { httpOnly: true, secure: true });
+    res.cookie("refreshAccessToken", "", { httpOnly: true, secure: true });
+
     return res.status(200).json({
       success: true,
       message: "User logout successfully",
     });
   } catch (error) {
     return res.status(400).json({
-      success:false,
-      message:"Fail to logout user"
-    })
+      success: false,
+      message: "Fail to logout user",
+    });
   }
 };
-
 
 // const forgotPassword = async (req, res) => {
 //   try {
@@ -213,10 +248,4 @@ const logoutUser = async (req, res) => {
 //   } catch (error) {}
 // };
 
-export {
-  registerUser,
-  verifyUser,
-  login,
-  getProfile,
-  logoutUser,
-};
+export { registerUser, verifyUser, login, getProfile, logoutUser };
