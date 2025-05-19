@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import apiClient from "../../service/apiClient";
 
 export default function Signup() {
@@ -9,32 +10,12 @@ export default function Signup() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const navigate = useNavigate()
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-
-    // try {
-    //   console.log("Trying to signup");
-    //   // const data = await apiClient.signup({name,email,password})
-    //   const response = await fetch("http://localhost:4000/api/v1/user/register", {
-    //     method: "POST",
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ name,email,password }),
-    //   });
-    //   if(!response.ok){
-    //     console.log(response.status)
-    //   }
-    //   const data = await response.json()
-    //   if (!data.success){
-    //     setError(data.message)
-    //   } else {
-    //     setLoading(false)
-    //     setSuccess(data.message)
-    //   }
-    // } catch (error) {
-    //   console.log("error from form", error);
-    // }
 
     try {
       console.log("Trying to signup");
@@ -42,14 +23,16 @@ export default function Signup() {
       if (!data.success) {
         setError(data.message);
       } else {
-        setLoading(false);
         setSuccess(data.message);
+        setTimeout(() => {
+          navigate("/login")
+        }, 1000);
       }
     } catch (error) {
       console.log("error from form", error);
+    } finally{
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
