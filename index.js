@@ -11,12 +11,15 @@ dotenv.config()
 
 const app = express()
 
-app.use(cors({
-    origin: process.env.BASE_URL,
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Match your frontend URL exactly
     credentials: true,
-    methods:["GET","PUT","DELETE","OPTIONS"],
-    allowedHeaders:["Content-Type, Authorization"],
-}))
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+    exposedHeaders: ["Set-Cookie", "*"],
+  })
+);
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(cookieParser())
@@ -39,6 +42,6 @@ connectDB()
 
 app.use("/api/v1/user", UserRoutes)
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+app.listen(4000, () => {
+  console.log(`Example app listening on port 4000`)
 })
